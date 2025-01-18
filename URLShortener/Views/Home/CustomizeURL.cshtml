@@ -1,0 +1,103 @@
+﻿@inject URLShortener.Helpers.LangTransHelper LangTransHelper
+
+<div class="row">
+    <div class="col-md-7" style="text-align:center;margin-bottom:20px;">
+        <input type="text" id="orignalURL" required name="URL" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("URL"))">
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-7" style="text-align:center;margin-bottom:20px;">
+        <input type="text" id="url" required name="URL" oninput="updateUrl()" value="@($"{Context.Request.Scheme}://{Context.Request.Host.Value}/c/")" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("URL"))">
+    </div>
+    <div class="col-md-3" style="text-align:center;margin-bottom:20px;">
+        <button type="button" id="shortURL" class="btn btn-primary" style="width:100%;">@Html.Raw(LangTransHelper.TransText("CustomizeURL"))</button>
+    </div>
+
+</div>
+
+
+
+<div class="row" id="shortedURLDiv" style="display:none;">
+    <div class="col-md-7">
+        <p class="alert alert-success" id="shortedURL"></p>
+    </div>
+</div>
+
+<div class="row" id="shortedURLDivError" style="display:none;">
+    <div class="col-md-7">
+        <p class="alert alert-danger" id="shortedURLError"></p>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        var shortedURL = null;
+
+        $('#shortURL').click(function () {
+            var url = $('#url').val().trim();
+            var orignalURL = $('#orignalURL').val().trim();
+
+            const fixedPart = url.replace("@($"{Context.Request.Scheme}://{Context.Request.Host.Value}/c/")", '');
+
+            if (!url || !orignalURL || !fixedPart) {
+                return;
+            }
+
+            $('#shortedURLDiv').hide();
+            $('#shortedURLDivError').hide();
+
+            $('#shortURL').prop('disabled', true);
+
+            $.ajax({
+                url: '/Home/CustomizeURL',
+                type: 'post',
+                data: { url, orignalURL },
+                success: function (data) {
+                    shortedURL = data.customizedURL;
+
+                    $('#shortedURL').html('@Html.Raw(LangTransHelper.TransText("CustomizedURL")): ' + data.customizedURL + '<button style="display:inline;float:right;" type="button" id="copyBtn" onclick="copyURL()" class="btn btn-success">@Html.Raw(LangTransHelper.TransText("Copy"))</button><br/>' + '@Html.Raw(LangTransHelper.TransText("ShortedURL")): ' + data.shortedURL + '<br />@Html.Raw(LangTransHelper.TransText("TotalViews")): ' + data.view + '<br/>@Html.Raw(LangTransHelper.TransText("CreatedDate")):  ' + data.createdDate + '<br/>@Html.Raw(LangTransHelper.TransText("LastView")): ' + data.lastView);
+
+                    $('#shortedURLDiv').show();
+
+                    $('#shortURL').prop('disabled', false);
+
+                    if (data.isSHort) {
+                        gtag('event', 'short_url', {
+                            value: 1
+                        });
+                    }
+
+                },
+                error: function (xhr) {
+                    const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred.';
+
+                    $('#shortedURLDivError').show();
+                    $('#shortedURLError').text(errorMessage);
+
+                    $('#shortURL').prop('disabled', false);
+                }
+            });
+        });
+
+        async function copyURL() {
+            await navigator.clipboard.writeText(shortedURL);
+
+            $('#copyBtn').text('@Html.Raw(LangTransHelper.TransText("Copied!"))');
+
+            setTimeout(function () {
+                $('#copyBtn').text('@Html.Raw(LangTransHelper.TransText("Copy"))');
+            }, 3000);
+        }
+
+        function updateUrl() {
+            const fixedPart = "@($"{Context.Request.Scheme}://{Context.Request.Host.Value}/c/")";
+            const input = document.getElementById("url");
+            if (!input.value.startsWith(fixedPart)) {
+                input.value = fixedPart;
+            }
+        }
+
+    </script>
+}

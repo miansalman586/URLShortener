@@ -1,0 +1,187 @@
+﻿@inject URLShortener.Helpers.LangTransHelper LangTransHelper
+
+<p style="font-size:50px;text-align:center;">@Html.Raw(LangTransHelper.TransText("HomeHeading1"))</p>
+<p style="text-align:center;font-size:25px;">@Html.Raw(LangTransHelper.TransText("HomeHeading2"))</p>
+
+
+<div class="row">
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-7" style="text-align:center;margin-bottom:20px;">
+        <input type="text" id="url" required name="URL" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("URL"))">
+    </div>
+    <div class="col-md-3" style="text-align:center;margin-bottom:20px;">
+        <button type="button" id="shortURL" class="btn btn-primary" style="width:100%;">@Html.Raw(LangTransHelper.TransText("ShortenURL"))</button>
+    </div>
+
+</div>
+
+
+
+<div class="row" id="shortedURLDiv" style="display:none;">
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-7">
+        <p class="alert alert-success" id="shortedURL"></p>
+    </div>
+</div>
+<div class="row" id="shortedURLDivError" style="display:none;">
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-7">
+        <p class="alert alert-danger" id="shortedURLError"></p>
+    </div>
+</div>
+
+<h4>
+    @Html.Raw(LangTransHelper.TransText("Heading1"))
+</h4>
+<p>
+
+    @Html.Raw(LangTransHelper.TransText("Description1"))
+
+</p>
+<h4>
+    @Html.Raw(LangTransHelper.TransText("Heading2"))
+</h4>
+<p>
+    @Html.Raw(LangTransHelper.TransText("Description2"))
+</p>
+
+<h4>
+    @Html.Raw(LangTransHelper.TransText("Heading3"))
+</h4>
+<p>
+    @Html.Raw(LangTransHelper.TransText("Description3"))
+</p>
+
+<div class="row" style="text-align:center;">
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-like.png" /><br />
+        <b> @Html.Raw(LangTransHelper.TransText("Easy"))</b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("EasyDesc"))
+        </p>
+    </div>
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-url.png" /><br />
+        <b>
+            @Html.Raw(LangTransHelper.TransText("Shortened"))
+            
+        </b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("ShortenedDesc"))
+        </p>
+    </div>
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-secure.png" /><br />
+        <b>
+            @Html.Raw(LangTransHelper.TransText("Secure"))
+            
+        </b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("SecureDesc"))
+        </p>
+    </div>
+</div>
+
+<div class="row" style="text-align:center;">
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-statistics.png" /><br />
+        <b>
+            @Html.Raw(LangTransHelper.TransText("Statistics"))
+            
+        </b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("StatisticsDesc"))
+        </p>
+    </div>
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-unique.png" /><br />
+
+        <b>
+            @Html.Raw(LangTransHelper.TransText("Reliable"))
+            
+        </b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("ReliableDesc"))
+        </p>
+    </div>
+    <div class="col-md-4 col-sm-4 col-4">
+        <img src="/images/icon-responsive.png" /><br />
+
+        <b>
+            @Html.Raw(LangTransHelper.TransText("Devices"))
+            
+        </b>
+        <p>
+            @Html.Raw(LangTransHelper.TransText("DevicesDesc"))
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var shortedURL = null;
+
+        $('#shortURL').click(function () {
+
+            var url = $('#url').val().trim()
+
+            if (!url) {
+                return;
+            }
+
+            $('#shortedURLDiv').hide();
+            $('#shortedURLDivError').hide();
+
+            $('#shortURL').prop('disabled', true);
+
+            $.ajax({
+                url: '/Home/ShortURL',
+                type: 'post',
+                data: { url },
+                success: function (data) {
+                    shortedURL = data.shortedURL;
+
+                    if (data.customizedURL) {
+                        $('#shortedURL').html('@Html.Raw(LangTransHelper.TransText("ShortedURL")): ' + data.shortedURL + '<button style="display:inline;float:right;" type="button" id="copyBtn" onclick="copyURL()" class="btn btn-success">@Html.Raw(LangTransHelper.TransText("Copy"))</button><br/>@Html.Raw(LangTransHelper.TransText("CustomizedURL")): ' + data.customizedURL + '<br/ >@Html.Raw(LangTransHelper.TransText("TotalViews")): ' + data.view + '<br/>@Html.Raw(LangTransHelper.TransText("CreatedDate")):  ' + data.createdDate + '<br/>@Html.Raw(LangTransHelper.TransText("LastView")): ' + data.lastView);
+                    } else {
+                        $('#shortedURL').html('@Html.Raw(LangTransHelper.TransText("ShortedURL")): ' + data.shortedURL + '<button style="display:inline;float:right;" type="button" id="copyBtn" onclick="copyURL()" class="btn btn-success">@Html.Raw(LangTransHelper.TransText("Copy"))</button><br/ >@Html.Raw(LangTransHelper.TransText("TotalViews")): ' + data.view + '<br/>@Html.Raw(LangTransHelper.TransText("CreatedDate")):  ' + data.createdDate + '<br/>@Html.Raw(LangTransHelper.TransText("LastView")): ' + data.lastView);
+                    }
+
+                    $('#shortedURLDiv').show();
+
+                    $('#shortURL').prop('disabled', false);
+
+                    if (data.isSHort) {
+                        gtag('event', 'short_url', {
+                            value: 1
+                        });
+                    }
+
+
+                },
+                error: function (xhr) {
+                    const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred.';
+
+                    $('#shortedURLDivError').show();
+                    $('#shortedURLError').text(errorMessage);
+
+                    $('#shortURL').prop('disabled', false);
+                }
+            });
+        });
+
+        async function copyURL() {
+            await navigator.clipboard.writeText(shortedURL);
+
+            $('#copyBtn').text('@Html.Raw(LangTransHelper.TransText("Copied!"))');
+
+            setTimeout(function () {
+                $('#copyBtn').text('@Html.Raw(LangTransHelper.TransText("Copy"))');
+            }, 3000);
+        }
+
+    </script>
+}

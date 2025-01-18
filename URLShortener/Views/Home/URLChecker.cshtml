@@ -1,0 +1,66 @@
+﻿@inject URLShortener.Helpers.LangTransHelper LangTransHelper
+
+<div class="row">
+    <div class="col-md-7" style="margin-bottom:20px;">
+        <input type="text" id="url" required name="URL" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("ShortedURL/CustomizeURL"))">
+    </div>
+    <div class="col-md-3" style="margin-bottom:20px;">
+        <button type="button" id="shortURL" class="btn btn-primary" style="width:100%;">@Html.Raw(LangTransHelper.TransText("CheckURL"))</button>
+    </div>
+
+</div>
+
+<div class="row" id="shortedURLDiv" style="display:none;">
+    <div class="col-md-7">
+        <p class="alert alert-success" id="shortedURL"></p>
+    </div>
+</div>
+
+<div class="row" id="shortedURLDivError" style="display:none;">
+    <div class="col-md-7">
+        <p class="alert alert-danger" id="shortedURLError"></p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#shortURL').click(function () {
+
+            var url = $('#url').val().trim()
+
+            if (!url) {
+                return;
+            }
+
+            $('#shortedURLDiv').hide();
+            $('#shortedURLDivError').hide();
+
+            $('#shortURL').prop('disabled', true);
+
+            $.ajax({
+                url: '/Home/URLChecker',
+                type: 'post',
+                data: { url },
+                success: function (data) {
+                    shortedURL = data.shortedURL;
+
+                    $('#shortedURL').html('@Html.Raw(LangTransHelper.TransText("URL")): ' + data.longURL + '<br/>@Html.Raw(LangTransHelper.TransText("TotalViews")): ' + data.view + '<br/>@Html.Raw(LangTransHelper.TransText("CreatedDate")):  ' + data.createdDate + '<br/>@Html.Raw(LangTransHelper.TransText("LastView")): ' + data.lastView);
+
+                    $('#shortedURLDiv').show();
+
+                    $('#shortURL').prop('disabled', false);
+
+                },
+                error: function (xhr) {
+                    const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred.';
+
+                    $('#shortedURLDivError').show();
+                    $('#shortedURLError').text(errorMessage);
+
+                    $('#shortURL').prop('disabled', false);
+                }
+            });
+        });
+
+    </script>
+}

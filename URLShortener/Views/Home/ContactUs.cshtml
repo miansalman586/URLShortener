@@ -1,0 +1,43 @@
+﻿@inject URLShortener.Helpers.LangTransHelper LangTransHelper
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>@Html.Raw(LangTransHelper.TransText("ContactUs"))</h3>
+        <hr />
+        @if (ViewData["Message"] != null)
+        {
+             <p class="alert alert-success">@ViewData["Message"]</p>
+        }
+        <form action="/Home/ContactUs" method="post">
+            <div class="form-group">
+                <label>@Html.Raw(LangTransHelper.TransText("FirstName"))</label>
+                <input type="text" required name="FirstName" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("FirstName"))">
+            </div>
+            <br />
+            <div class="form-group">
+                <label>@Html.Raw(LangTransHelper.TransText("LastName"))</label>
+                <input type="text" required name="LastName" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("LastName"))">
+            </div>
+            <br />
+
+            <div class="form-group">
+                <label>@Html.Raw(LangTransHelper.TransText("Subject"))</label>
+                <input type="text" required name="Subject" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("Subject"))">
+            </div>
+            <br />
+
+            <div class="form-group">
+                <label>@Html.Raw(LangTransHelper.TransText("Email"))</label>
+                <input type="email" required name="EmailAddress" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("Email"))">
+            </div>
+            <br />
+            <div class="form-group">
+                <label>@Html.Raw(LangTransHelper.TransText("Message"))</label>
+                <textarea required name="Message" class="form-control" placeholder="@Html.Raw(LangTransHelper.TransText("Message"))"></textarea>
+            </div>
+            <br />
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">@Html.Raw(LangTransHelper.TransText("Submit"))</button>
+        </form>
+    </div>
+</div>
