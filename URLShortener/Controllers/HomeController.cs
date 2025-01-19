@@ -100,6 +100,11 @@ namespace URLShortener.Controllers
                 return NotFound();
             }
 
+            if (shortedURL.IsDeleted == true)
+            {
+                return NoContent();
+            }
+
             shortedURL.View = shortedURL.View + 1;
             shortedURL.LastView = DateTime.Now;
             _appDbContext.ShortedURL.Update(shortedURL);
@@ -198,6 +203,11 @@ namespace URLShortener.Controllers
             if (shortedURL == null)
             {
                 return NotFound();
+            }
+
+            if (shortedURL.IsDeleted == true)
+            {
+                return NoContent();
             }
 
             shortedURL.View = shortedURL.View + 1;

@@ -11,5 +11,6 @@ namespace URLShortener.Entity
         public int View { get; set; }
         public DateTime? LastView { get; set; }
         public string? CustomizedURL { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }
