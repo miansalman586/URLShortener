@@ -66,6 +66,17 @@ namespace URLShortener.Controllers
             return result;
         }
 
+        [NonAction]
+        private bool IsIndexingCrawler()
+        {
+            string userAgent = HttpContext.Request.Headers["User-Agent"].ToString().ToLower();
+
+            return userAgent.Contains("googlebot") ||
+                userAgent.Contains("ahrefsbot") ||
+                userAgent.Contains("bingbot") ||
+                userAgent.Contains("yandexbot");
+        }
+
         [Route("{url}")]
         public async Task<IActionResult> Index(string url)
         {
@@ -74,6 +85,11 @@ namespace URLShortener.Controllers
                 ViewData["IsLang"] = true;
 
                 return View();
+            }
+
+            if (IsIndexingCrawler())
+            {
+                return RedirectPermanent("/");
             }
 
             long id = ConvertBase36ToDecimal(url);
@@ -173,6 +189,11 @@ namespace URLShortener.Controllers
         [HttpGet("c/{url}")]
         public async Task<IActionResult> CustomizeURL(string url)
         {
+            if (IsIndexingCrawler())
+            {
+                return RedirectPermanent("/");
+            }
+
             var shortedURL = await _appDbContext.ShortedURL.Where(e => e.CustomizedURL == url).SingleOrDefaultAsync();
             if (shortedURL == null)
             {
