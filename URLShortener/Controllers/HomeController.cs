@@ -74,7 +74,8 @@ namespace URLShortener.Controllers
             return userAgent.Contains("googlebot") ||
                 userAgent.Contains("ahrefsbot") ||
                 userAgent.Contains("bingbot") ||
-                userAgent.Contains("yandexbot");
+                userAgent.Contains("yandexbot") ||
+                userAgent.Contains("semrushbot");
         }
 
         [Route("{url}")]
@@ -316,146 +317,6 @@ namespace URLShortener.Controllers
         }
 
         public IActionResult URLChecker()
-        {
-            return View();
-        }
-
-        public IActionResult Lifestyle()
-        {
-            return View();
-        }
-
-        [Route("10-Simple-Habits-to-Transform-Your-Daily-Routine")]
-        public IActionResult Lifestyle1()
-        {
-            return View();
-        }
-
-        [Route("The-Ultimate-Guide-to-Balancing-Work-Life-and-Wellness")]
-        public IActionResult Lifestyle2()
-        {
-            return View();
-        }
-
-        [Route("Stylish-Living:-Affordable-Home-Decor-Ideas-for-Every-Budget")]
-        public IActionResult Lifestyle3()
-        {
-            return View();
-        }
-
-        [Route("Top-Travel-Destinations-for-a-Soulful-Escape")]
-        public IActionResult Lifestyle4()
-        {
-            return View();
-        }
-
-        [Route("Self-Care-101-Practical-Tips-for-a-Happier-You")]
-        public IActionResult Lifestyle5()
-        {
-            return View();
-        }
-
-        public IActionResult Technology()
-        {
-            return View();
-        }
-
-        [Route("the-role-of-Technology-in-Shaping-Our-Future")]
-        public IActionResult Technology1()
-        {
-            return View();
-        }
-
-        [Route("The-Evolution-of-Artificial-Intelligence-From-Concept-to-Reality")]
-        public IActionResult Technology2()
-        {
-            return View();
-        }
-
-        [Route("Cybersecurity-in-a-Digital-World-How-to-Stay-Safe-Online")]
-        public IActionResult Technology3()
-        {
-            return View();
-        }
-
-        [Route("Revolutionizing-Industries-How-IoT-is-Transforming-Everyday-Life")]
-        public IActionResult Technology4()
-        {
-            return View();
-        }
-
-        [Route("The-Ultimate-Guide-to-Building-Your-Own-Smart-Home-Ecosystem")]
-        public IActionResult Technology5()
-        {
-            return View();
-        }
-
-        public IActionResult HealthWellness()
-        {
-            return View();
-        }
-
-        [Route("Mindful-Living-How-to-Cultivate-a-Healthier-Mindset-Every-Day")]
-        public IActionResult HealthWellness1()
-        {
-            return View();
-        }
-
-        [Route("The-Power-of-Nutrition-Building-a-Diet-for-Longevity-and-Vitality")]
-        public IActionResult HealthWellness2()
-        {
-            return View();
-        }
-
-        [Route("Fitness-for-Life-Simple-Workouts-to-Boost-Your-Energy-Levels")]
-        public IActionResult HealthWellness3()
-        {
-            return View();
-        }
-
-        [Route("Stress-Management-101-Techniques-for-a-Balanced-and-Peaceful-Life")]
-        public IActionResult HealthWellness4()
-        {
-            return View();
-        }
-
-        [Route("The-Importance-of-Sleep-Unlocking-the-Secrets-to-Restful-Nights")]
-        public IActionResult HealthWellness5()
-        {
-            return View();
-        }
-
-        public IActionResult PersonalFinance()
-        {
-            return View();
-        }
-
-        [Route("Budgeting-Made-Simple-Easy-Tips-for-Managing-Your-Money")]
-        public IActionResult PersonalFinance1()
-        {
-            return View();
-        }
-
-        [Route("Investing-for-Beginners-Building-Wealth-with-Confidence")]
-        public IActionResult PersonalFinance2()
-        {
-            return View();
-        }
-
-        [Route("The-Power-of-Saving-How-to-Build-a-Solid-Emergency-Fund")]
-        public IActionResult PersonalFinance3()
-        {
-            return View();
-        }
-
-        [Route("Understanding-Credit-How-to-Improve-Your-Score-and-Save-Money")]
-        public IActionResult PersonalFinance4()
-        {
-            return View();
-        }
-
-        [Route("Smart-Ways-to-Pay-Off-Debt-Strategies-for-Financial-Freedom")]
-        public IActionResult PersonalFinance5()
         {
             return View();
         }
