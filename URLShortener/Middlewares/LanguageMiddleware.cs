@@ -23,7 +23,7 @@ namespace URLShortener.Middlewares
             _memoryCache = memoryCache;
             _configuration = configuration;
 
-            client = TranslationClient.CreateFromApiKey(_configuration["GoogleTranslationAPIKey"]);
+            client = TranslationClient.CreateFromApiKey(_configuration["GoogleAPIKey"]);
         }
 
         public async Task InvokeAsync(HttpContext context)

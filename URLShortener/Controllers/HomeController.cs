@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using Azure.Core;
 using URLShortener.Helpers;
+using Newtonsoft.Json;
 
 namespace URLShortener.Controllers
 {
@@ -19,11 +20,16 @@ namespace URLShortener.Controllers
         private readonly ContactDbContext _contactDbContext;
         private readonly LangTransHelper _langTransHelper;
 
-        public HomeController(AppDbContext appDbContext, ContactDbContext contactDbContext, LangTransHelper langTransHelper)
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
+
+        public HomeController(AppDbContext appDbContext, ContactDbContext contactDbContext, LangTransHelper langTransHelper, HttpClient httpClient, IConfiguration configuration)
         {
             _appDbContext = appDbContext;
             _contactDbContext = contactDbContext;
             _langTransHelper = langTransHelper;
+            _httpClient = httpClient;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -106,6 +112,49 @@ namespace URLShortener.Controllers
                 return NoContent();
             }
 
+            if (shortedURL.IsSafe == null)
+            {
+                var requestPayload = new
+                {
+                    client = new
+                    {
+                        clientId = _configuration["GoogleClientId"],
+                        clientVersion = "1.0"
+                    },
+                    threatInfo = new
+                    {
+                        threatTypes = new[] { "MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION" },
+                        platformTypes = new[] { "ANY_PLATFORM" },
+                        threatEntryTypes = new[] { "URL" },
+                        threatEntries = new[]
+                    {
+                    new { url = shortedURL.LongURL }
+                }
+                    }
+                };
+                string jsonPayload = JsonConvert.SerializeObject(requestPayload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var safeResult = await _httpClient.PostAsync($"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={_configuration["GoogleAPIKey"]}", content);
+                string resSafe = await safeResult.Content.ReadAsStringAsync();
+                if (!resSafe.Contains("matches"))
+                {
+                    shortedURL.IsSafe = true;
+                }
+                else
+                {
+                    shortedURL.IsSafe = false;
+
+                    _appDbContext.ShortedURL.Update(shortedURL);
+                    await _appDbContext.SaveChangesAsync();
+                }
+            }
+
+            if (shortedURL.IsSafe == false)
+            {
+                return NoContent();
+            }
+
             shortedURL.View = shortedURL.View + 1;
             shortedURL.LastView = DateTime.Now;
             _appDbContext.ShortedURL.Update(shortedURL);
@@ -125,7 +174,9 @@ namespace URLShortener.Controllers
         [HttpPost]
         public async Task<IActionResult> ShortURL(ShortURLModel request)
         {
-            if (!IsValidUrl(request.URL))
+            if (!IsValidUrl(request.URL) ||
+                   request.URL.ToLower().StartsWith("https://url-shortener.xyz/") ||
+                   request.URL.ToLower().StartsWith("http://url-shortener.xyz/"))
             {
                 return BadRequest(new { message = _langTransHelper.TransText("InvalidURL.") });
             }
@@ -211,6 +262,49 @@ namespace URLShortener.Controllers
                 return NoContent();
             }
 
+            if (shortedURL.IsSafe == null)
+            {
+                var requestPayload = new
+                {
+                    client = new
+                    {
+                        clientId = _configuration["GoogleClientId"],
+                        clientVersion = "1.0"
+                    },
+                    threatInfo = new
+                    {
+                        threatTypes = new[] { "MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION" },
+                        platformTypes = new[] { "ANY_PLATFORM" },
+                        threatEntryTypes = new[] { "URL" },
+                        threatEntries = new[]
+                        {
+                            new { url = shortedURL.LongURL }
+                        }
+                    }
+                };
+                string jsonPayload = JsonConvert.SerializeObject(requestPayload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var safeResult = await _httpClient.PostAsync($"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={_configuration["GoogleAPIKey"]}", content);
+                string resSafe = await safeResult.Content.ReadAsStringAsync();
+                if (!resSafe.Contains("matches"))
+                {
+                    shortedURL.IsSafe = true;
+                }
+                else
+                {
+                    shortedURL.IsSafe = false;
+
+                    _appDbContext.ShortedURL.Update(shortedURL);
+                    await _appDbContext.SaveChangesAsync();
+                }
+            }
+
+            if (shortedURL.IsSafe == false)
+            {
+                return NoContent();
+            }
+
             shortedURL.View = shortedURL.View + 1;
             shortedURL.LastView = DateTime.Now;
             _appDbContext.ShortedURL.Update(shortedURL);
@@ -223,7 +317,9 @@ namespace URLShortener.Controllers
         [HttpPost]
         public async Task<IActionResult> CustomizeURL(CustomizeURLModel request)
         {
-            if (!IsValidUrl(request.OrignalURL))
+            if (!IsValidUrl(request.OrignalURL) ||
+                   request.URL.ToLower().StartsWith("https://url-shortener.xyz/") ||
+                   request.URL.ToLower().StartsWith("http://url-shortener.xyz/"))
             {
                 return BadRequest(new { message = _langTransHelper.TransText("InvalidURL.") });
             }

@@ -20,7 +20,7 @@ namespace URLShortener.Helpers
             _memoryCache = memoryCache;
             _serviceProvider = serviceProvider;
 
-            client = TranslationClient.CreateFromApiKey(_configuration["GoogleTranslationAPIKey"]);
+            client = TranslationClient.CreateFromApiKey(_configuration["GoogleAPIKey"]);
         }
 
         public string TransText(string transText)
