@@ -11,6 +11,9 @@ using static System.Runtime.CompilerServices.RuntimeHelpers;
 using Azure.Core;
 using URLShortener.Helpers;
 using Newtonsoft.Json;
+using System.Data;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 namespace URLShortener.Controllers
 {
@@ -20,16 +23,11 @@ namespace URLShortener.Controllers
         private readonly ContactDbContext _contactDbContext;
         private readonly LangTransHelper _langTransHelper;
 
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
-
-        public HomeController(AppDbContext appDbContext, ContactDbContext contactDbContext, LangTransHelper langTransHelper, HttpClient httpClient, IConfiguration configuration)
+        public HomeController(AppDbContext appDbContext, ContactDbContext contactDbContext, LangTransHelper langTransHelper)
         {
             _appDbContext = appDbContext;
             _contactDbContext = contactDbContext;
             _langTransHelper = langTransHelper;
-            _httpClient = httpClient;
-            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -84,6 +82,17 @@ namespace URLShortener.Controllers
                 userAgent.Contains("semrushbot");
         }
 
+        [NonAction]
+        private bool IsRealDevice()
+        {
+            return
+                HttpContext.Request.Headers["User-Agent"].ToString().Contains("Windows NT 10.0") || // Windows
+                HttpContext.Request.Headers["User-Agent"].ToString().Contains("Linux; Android 15") || HttpContext.Request.Headers["User-Agent"].ToString().Contains("Android 15; Mobile;") || // Android
+                HttpContext.Request.Headers["User-Agent"].ToString().Contains("Macintosh; Intel Mac OS X") || // MacOS
+                HttpContext.Request.Headers["User-Agent"].ToString().Contains("X11; Ubuntu; Linux") || // Ubuntu
+                HttpContext.Request.Headers["User-Agent"].ToString().Contains("iPhone; CPU iPhone OS"); // iPhone
+        }
+
         [Route("{url}")]
         public async Task<IActionResult> Index(string url)
         {
@@ -112,54 +121,24 @@ namespace URLShortener.Controllers
                 return NoContent();
             }
 
-            if (shortedURL.IsSafe == null)
+            if (IsRealDevice())
             {
-                var requestPayload = new
+                int view = shortedURL.View;
+
+                shortedURL.View = shortedURL.View + 1;
+                shortedURL.LastView = DateTime.Now;
+                _appDbContext.ShortedURL.Update(shortedURL);
+
+                await _appDbContext.SaveChangesAsync();
+
+                if (shortedURL.IsAdSurf == true)
                 {
-                    client = new
+                    if (view % 10 == 0)
                     {
-                        clientId = _configuration["GoogleClientId"],
-                        clientVersion = "1.0"
-                    },
-                    threatInfo = new
-                    {
-                        threatTypes = new[] { "MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION" },
-                        platformTypes = new[] { "ANY_PLATFORM" },
-                        threatEntryTypes = new[] { "URL" },
-                        threatEntries = new[]
-                    {
-                    new { url = shortedURL.LongURL }
-                }
+                        return Redirect("https://poawooptugroo.com/4/8791191");
                     }
-                };
-                string jsonPayload = JsonConvert.SerializeObject(requestPayload);
-                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                var safeResult = await _httpClient.PostAsync($"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={_configuration["GoogleAPIKey"]}", content);
-                string resSafe = await safeResult.Content.ReadAsStringAsync();
-                if (!resSafe.Contains("matches"))
-                {
-                    shortedURL.IsSafe = true;
-                }
-                else
-                {
-                    shortedURL.IsSafe = false;
-
-                    _appDbContext.ShortedURL.Update(shortedURL);
-                    await _appDbContext.SaveChangesAsync();
                 }
             }
-
-            if (shortedURL.IsSafe == false)
-            {
-                return NoContent();
-            }
-
-            shortedURL.View = shortedURL.View + 1;
-            shortedURL.LastView = DateTime.Now;
-            _appDbContext.ShortedURL.Update(shortedURL);
-
-            await _appDbContext.SaveChangesAsync();
 
             return RedirectPermanent(shortedURL.LongURL);
         }
@@ -262,54 +241,24 @@ namespace URLShortener.Controllers
                 return NoContent();
             }
 
-            if (shortedURL.IsSafe == null)
+            if (IsRealDevice())
             {
-                var requestPayload = new
+                int view = shortedURL.View;
+
+                shortedURL.View = shortedURL.View + 1;
+                shortedURL.LastView = DateTime.Now;
+                _appDbContext.ShortedURL.Update(shortedURL);
+
+                await _appDbContext.SaveChangesAsync();
+
+                if (shortedURL.IsAdSurf == true)
                 {
-                    client = new
+                    if (view % 10 == 0)
                     {
-                        clientId = _configuration["GoogleClientId"],
-                        clientVersion = "1.0"
-                    },
-                    threatInfo = new
-                    {
-                        threatTypes = new[] { "MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION" },
-                        platformTypes = new[] { "ANY_PLATFORM" },
-                        threatEntryTypes = new[] { "URL" },
-                        threatEntries = new[]
-                        {
-                            new { url = shortedURL.LongURL }
-                        }
+                        return Redirect("https://poawooptugroo.com/4/8791191");
                     }
-                };
-                string jsonPayload = JsonConvert.SerializeObject(requestPayload);
-                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                var safeResult = await _httpClient.PostAsync($"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={_configuration["GoogleAPIKey"]}", content);
-                string resSafe = await safeResult.Content.ReadAsStringAsync();
-                if (!resSafe.Contains("matches"))
-                {
-                    shortedURL.IsSafe = true;
-                }
-                else
-                {
-                    shortedURL.IsSafe = false;
-
-                    _appDbContext.ShortedURL.Update(shortedURL);
-                    await _appDbContext.SaveChangesAsync();
                 }
             }
-
-            if (shortedURL.IsSafe == false)
-            {
-                return NoContent();
-            }
-
-            shortedURL.View = shortedURL.View + 1;
-            shortedURL.LastView = DateTime.Now;
-            _appDbContext.ShortedURL.Update(shortedURL);
-
-            await _appDbContext.SaveChangesAsync();
 
             return RedirectPermanent(shortedURL.LongURL);
         }
